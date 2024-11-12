@@ -206,6 +206,7 @@ if page == "4":
     cos_vals = np.cos(theta_vals)
     x_data, sin_data, cos_data = [], [], []
 
+
     # Update function for animation
     def update(frame):
         # Update the point on the unit circle
@@ -221,12 +222,13 @@ if page == "4":
 
         return point, sin_line, cos_line
 
+
     # Create the animation
     ani = FuncAnimation(fig, update, frames=len(theta_vals), blit=True, interval=50)
 
     # Save the animation as a GIF in a BytesIO buffer
     buf = BytesIO()
-    ani.save(buf, format="gif", writer="pillow", fps=20)  # Use pillow writer to save as GIF
+    ani.save(buf, writer="pillow", fps=20)  # Use pillow writer to save as GIF
     buf.seek(0)
 
     # Display the GIF in Streamlit
