@@ -3,6 +3,43 @@ import numpy as np
 import matplotlib.pyplot as plt
 import sympy as sp
 
+# Navbar with the title "Study Room" and hyperlinks
+st.markdown(
+    """
+    <style>
+        .navbar {
+            background-color: #f63366;
+            padding: 10px;
+            text-align: center;
+            color: white;
+            font-size: 24px;
+            font-weight: bold;
+        }
+        .members {
+            text-align: center;
+            font-size: 18px;
+            margin-top: 10px;
+        }
+        .members a {
+            color: black;
+            text-decoration: none;
+            margin: 0 10px;
+        }
+        .members a:hover {
+            color: #f63366;
+            text-decoration: underline;
+        }
+    </style>
+    <div class="navbar">Study Room</div>
+    <div class="members">
+        <a href="https://example.com/sehyun" target="_blank">Yoo Sehyun</a> | 
+        <a href="https://example.com/hyeri" target="_blank">Lee Hyeri</a> | 
+        <a href="https://example.com/hyein" target="_blank">Seo Hyein</a>
+    </div>
+    """,
+    unsafe_allow_html=True
+)
+
 # Define the page navigation
 page = st.radio("Go to page:", ["1", "2", "3"], horizontal=True)
 
