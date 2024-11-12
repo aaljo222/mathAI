@@ -167,22 +167,36 @@ elif page == "2":
     except (sp.SympifyError, TypeError):
         st.error("Invalid function input. Please enter a valid mathematical expression.")
 
-# Page 3: Eigenvalues and Eigenvectors
+# Page 3: Eigenvalues and Eigenvectors with Elliptical Data
 elif page == "3":
-    st.title("Eigenvalues and Eigenvectors of a 2x2 Matrix")
+    st.title("Eigenvalues and Eigenvectors of a 2x2 Matrix with Elliptical Data")
 
     # Input fields for a 2x2 matrix
     st.subheader("Enter the values for a 2x2 matrix:")
     a = st.number_input("Matrix element a (top-left)", value=1.0, step=0.1)
-    b = st.number_input("Matrix element b (top-right)", value=2.0, step=0.1)
-    c = st.number_input("Matrix element c (bottom-left)", value=3.0, step=0.1)
-    d = st.number_input("Matrix element d (bottom-right)", value=4.0, step=0.1)
+    b = st.number_input("Matrix element b (top-right)", value=0.5, step=0.1)
+    c = st.number_input("Matrix element c (bottom-left)", value=0.5, step=0.1)
+    d = st.number_input("Matrix element d (bottom-right)", value=2.0, step=0.1)
 
     # Create the matrix
     matrix = np.array([[a, b], [c, d]])
 
+    # Generate random data points in an elliptical shape
+    np.random.seed(0)
+    theta = np.linspace(0, 2 * np.pi, 100)
+    x = 2 * np.cos(theta) + np.random.normal(scale=0.1, size=theta.shape)
+    y = np.sin(theta) + np.random.normal(scale=0.1, size=theta.shape)
+    points = np.vstack([x, y])
+
+    # Transform data points by the matrix
+    transformed_points = matrix @ points
+
     # Calculate eigenvalues and eigenvectors
     eigenvalues, eigenvectors = np.linalg.eig(matrix)
+    max_eigenvalue = np.max(eigenvalues)
+    min_eigenvalue = np.min(eigenvalues)
+    max_eigenvector = eigenvectors[:, np.argmax(eigenvalues)]
+    min_eigenvector = eigenvectors[:, np.argmin(eigenvalues)]
 
     # Display the matrix, eigenvalues, and eigenvectors
     st.write("Matrix:")
@@ -190,24 +204,26 @@ elif page == "3":
     st.write("Eigenvalues:", eigenvalues)
     st.write("Eigenvectors:", eigenvectors)
 
-    # Plot eigenvectors with the eigenvalues as scaling factors
+    # Plot the transformed data with eigenvectors
     fig, ax = plt.subplots()
+    ax.scatter(transformed_points[0, :], transformed_points[1, :], color='skyblue', alpha=0.7,
+               label="Transformed Points")
+
+    # Plot eigenvectors scaled by their respective eigenvalues
     origin = [0, 0]  # origin point for the vectors
+    ax.quiver(*origin, max_eigenvector[0] * max_eigenvalue, max_eigenvector[1] * max_eigenvalue,
+              angles='xy', scale_units='xy', scale=1, color="red", label="Max Eigenvector")
+    ax.quiver(*origin, min_eigenvector[0] * min_eigenvalue, min_eigenvector[1] * min_eigenvalue,
+              angles='xy', scale_units='xy', scale=1, color="green", label="Min Eigenvector")
 
-    # Plot eigenvectors scaled by eigenvalues
-    for i in range(len(eigenvalues)):
-        eigenvector = eigenvectors[:, i]
-        eigenvalue = eigenvalues[i]
-        ax.quiver(*origin, eigenvector[0], eigenvector[1], angles='xy', scale_units='xy', scale=1, color="r" if i == 0 else "b", label=f"Eigenvector {i+1}")
-
-    # Set plot limits
-    limit = max(abs(eigenvalues).max(), abs(matrix).max()) * 1.5
+    # Set plot limits and labels
+    limit = max(abs(transformed_points).max(), abs(max_eigenvalue), abs(min_eigenvalue)) * 1.5
     ax.set_xlim(-limit, limit)
     ax.set_ylim(-limit, limit)
     ax.set_aspect('equal', 'box')
     plt.xlabel("X")
     plt.ylabel("Y")
-    plt.title("Eigenvalues and Eigenvectors")
+    plt.title("Transformed Elliptical Data with Eigenvectors")
     plt.axhline(0, color='gray', linewidth=0.5)
     plt.axvline(0, color='gray', linewidth=0.5)
     plt.grid(color='gray', linestyle='--', linewidth=0.5)
