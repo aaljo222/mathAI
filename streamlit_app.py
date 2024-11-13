@@ -174,7 +174,9 @@ elif page == "3":
 
 # Page 4: Euler's Formula Visualization with Animation
 if page == "4":
-    st.title("Euler's Formula Data for Animation")
+    # Set CORS headers (optional depending on deployment)
+    st.experimental_set_query_params()
+
 
     # Define the function to calculate Euler points on the unit circle
     def calculate_euler_points(steps=100):
@@ -183,8 +185,6 @@ if page == "4":
         return points
 
 
-    # JSON endpoint
-    st.title("Euler's Formula Data for Animation")
-    if st.button("Generate Euler Points"):
-        euler_data = calculate_euler_points()
-        st.write(json.dumps(euler_data))
+    # Serve JSON data as API response
+    euler_data = calculate_euler_points()
+    st.write(json.dumps(euler_data))  # Directly serve JSON data without UI components
