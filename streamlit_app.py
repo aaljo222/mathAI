@@ -2,9 +2,7 @@ import streamlit as st
 import numpy as np
 import matplotlib.pyplot as plt
 import sympy as sp
-from matplotlib.animation import FuncAnimation
-from io import BytesIO
-import base64
+import json
 
 # Navbar with the title "Study Room" and hyperlinks
 st.markdown(
@@ -173,63 +171,27 @@ elif page == "3":
     plt.legend()
     plt.grid(True)
     st.pyplot(fig)
+
 # Page 4: Euler's Formula Visualization with Animation
 if page == "4":
-    st.title("Euler's Formula Visualization")
+    st.title("Euler's Formula Data for Animation")
 
-    # Create the figure and axes for the animation
-    fig, (ax_circle, ax_sin, ax_cos) = plt.subplots(1, 3, figsize=(12, 4), gridspec_kw={'width_ratios': [1, 1, 1]})
-    plt.subplots_adjust(wspace=0.5)
+    # Define the function to calculate Euler points on the unit circle
+    def calculate_euler_points(steps=100):
+        theta_values = np.linspace(0, 2 * np.pi, steps)
+        points = [{"theta": theta, "cos": np.cos(theta), "sin": np.sin(theta)} for theta in theta_values]
+        return points
 
-    # Set up the unit circle plot
-    ax_circle.set_aspect('equal', 'box')
-    ax_circle.plot(np.cos(np.linspace(0, 2 * np.pi, 100)), np.sin(np.linspace(0, 2 * np.pi, 100)), color="blue")
-    ax_circle.set_xlim(-1.2, 1.2)
-    ax_circle.set_ylim(-1.2, 1.2)
-    point, = ax_circle.plot([], [], 'ro')  # The moving point
+    # Provide data to the frontend in JSON format
+    if st.button("Generate Euler Points"):
+        euler_data = calculate_euler_points()
+        st.write("Sample Data Points for Euler's Animation:")
+        st.json(euler_data)  # Display JSON format in Streamlit
 
-    # Set up the sine and cosine plots
-    ax_sin.set_xlim(0, 2 * np.pi)
-    ax_sin.set_ylim(-1.5, 1.5)
-    ax_cos.set_xlim(0, 2 * np.pi)
-    ax_cos.set_ylim(-1.5, 1.5)
-    ax_sin.set_title("Sine Wave")
-    ax_cos.set_title("Cosine Wave")
-    sin_line, = ax_sin.plot([], [], 'b-', label="sin(θ)")
-    cos_line, = ax_cos.plot([], [], 'g-', label="cos(θ)")
-    ax_sin.legend()
-    ax_cos.legend()
-
-    # Data for animation
-    theta_vals = np.linspace(0, 2 * np.pi, 200)
-    sin_vals = np.sin(theta_vals)
-    cos_vals = np.cos(theta_vals)
-    x_data, sin_data, cos_data = [], [], []
-
-
-    # Update function for animation
-    def update(frame):
-        # Update the point on the unit circle
-        theta = theta_vals[frame]
-        point.set_data([np.cos(theta)], [np.sin(theta)])  # Use lists to pass single points
-
-        # Update sine and cosine wave
-        x_data.append(theta)
-        sin_data.append(np.sin(theta))
-        cos_data.append(np.cos(theta))
-        sin_line.set_data(x_data, sin_data)
-        cos_line.set_data(x_data, cos_data)
-
-        return point, sin_line, cos_line
-
-
-    # Create the animation
-    ani = FuncAnimation(fig, update, frames=len(theta_vals), blit=True, interval=50)
-
-    # Save the animation as a GIF in a BytesIO buffer
-    buf = BytesIO()
-    ani.save(buf, writer="pillow", fps=20)  # Use pillow writer to save as GIF
-    buf.seek(0)
-
-    # Display the GIF in Streamlit
-    st.image(buf, format="gif", caption="Euler's Formula Visualization", use_column_width=True)
+        # Show the data as downloadable JSON
+        st.download_button(
+            label="Download Euler Points",
+            data=json.dumps(euler_data),
+            file_name="euler_points.json",
+            mime="application/json"
+        )
