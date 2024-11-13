@@ -182,16 +182,9 @@ if page == "4":
         points = [{"theta": theta, "cos": np.cos(theta), "sin": np.sin(theta)} for theta in theta_values]
         return points
 
-    # Provide data to the frontend in JSON format
+
+    # JSON endpoint
+    st.title("Euler's Formula Data for Animation")
     if st.button("Generate Euler Points"):
         euler_data = calculate_euler_points()
-        st.write("Sample Data Points for Euler's Animation:")
-        st.json(euler_data)  # Display JSON format in Streamlit
-
-        # Show the data as downloadable JSON
-        st.download_button(
-            label="Download Euler Points",
-            data=json.dumps(euler_data),
-            file_name="euler_points.json",
-            mime="application/json"
-        )
+        st.write(json.dumps(euler_data))
