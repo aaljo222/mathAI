@@ -174,17 +174,57 @@ elif page == "3":
 
 # Page 4: Euler's Formula Visualization with Animation
 if page == "4":
-    # Set CORS headers (optional depending on deployment)
-    st.experimental_set_query_params()
+    st.title("Linear Combination and Dimension Analysis")
 
+    # Dimension input for vector generation
+    dimension = st.number_input("Enter the dimension (e.g., 3 for 3D):", min_value=2, value=3, step=1)
 
-    # Define the function to calculate Euler points on the unit circle
-    def calculate_euler_points(steps=100):
-        theta_values = np.linspace(0, 2 * np.pi, steps)
-        points = [{"theta": theta, "cos": np.cos(theta), "sin": np.sin(theta)} for theta in theta_values]
-        return points
+    if dimension >= 2:
+        st.write(f"Generating {dimension}D vectors")
+        st.write(
+            "In an n-dimensional space, we generate n-1 independent vectors, with one dependent vector as a linear combination. 3차원을 넘어서는 것은  시각화불가")
 
+        # Generate n-1 independent vectors
+        independent_vectors = [np.random.rand(dimension) for _ in range(dimension - 1)]
 
-    # Serve JSON data as API response
-    euler_data = calculate_euler_points()
-    st.write(json.dumps(euler_data))  # Directly serve JSON data without UI components
+        # Create a dependent vector as a linear combination of the independent vectors
+        dependent_vector = sum(independent_vectors)  # Simple linear combination for dependency
+
+        # Display the vectors
+        for i, vec in enumerate(independent_vectors, 1):
+            st.write(f"Independent Vector {i}:", vec)
+        st.write("Dependent Vector (linear combination of independent vectors):", dependent_vector)
+
+        # Linear combination visualization
+        st.subheader("Adjust coefficients to see the linear combination")
+
+        # Coefficients for the independent vectors
+        coefficients = [st.slider(f"Coefficient for Vector {i + 1}", -2.0, 2.0, 1.0, 0.1) for i in range(dimension - 1)]
+
+        # Compute the linear combination based on the selected coefficients
+        linear_combination = sum(coef * vec for coef, vec in zip(coefficients, independent_vectors))
+        st.write("Resulting Vector from Linear Combination:", linear_combination)
+
+        # Plot the linear combination for 2D or 3D
+        fig = plt.figure()
+        if dimension == 2:
+            plt.quiver(0, 0, independent_vectors[0][0], independent_vectors[0][1], angles='xy', scale_units='xy',
+                       scale=1, color="r", label="Vector 1")
+            plt.quiver(0, 0, linear_combination[0], linear_combination[1], angles='xy', scale_units='xy', scale=1,
+                       color="g", label="Linear Combination")
+            plt.xlim(-2, 2)
+            plt.ylim(-2, 2)
+            plt.grid()
+            plt.legend()
+        elif dimension == 3:
+            ax = fig.add_subplot(111, projection='3d')
+            for i, vec in enumerate(independent_vectors, 1):
+                ax.quiver(0, 0, 0, vec[0], vec[1], vec[2], color=np.random.rand(3, ), label=f"Vector {i}")
+            ax.quiver(0, 0, 0, linear_combination[0], linear_combination[1], linear_combination[2], color="g",
+                      label="Linear Combination")
+            ax.set_xlim([-2, 2])
+            ax.set_ylim([-2, 2])
+            ax.set_zlim([-2, 2])
+            plt.legend()
+
+        st.pyplot(fig)
