@@ -3,7 +3,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import sympy as sp
 import json
-
+import  pandas as pd
 # Navbar with the title "Study Room" and hyperlinks
 st.markdown(
     """
@@ -40,9 +40,9 @@ st.markdown(
     """,
     unsafe_allow_html=True
 )
-# Page navigation
-page = st.radio("Go to page:", ["1", "2", "3", "4"], horizontal=True)
 
+# Page navigation
+page = st.radio("Go to page:", ["1", "2", "3", "4", "5"], horizontal=True)
 
 # Page 1: Vector Addition and Differentiation
 if page == "1":
@@ -228,3 +228,83 @@ if page == "4":
             plt.legend()
 
         st.pyplot(fig)
+
+
+# Function to calculate REF (Row Echelon Form)
+def ref(matrix):
+    m = np.array(matrix, dtype=np.float64)
+    rows, cols = m.shape
+    for i in range(min(rows, cols)):
+        if abs(m[i, i]) < 1e-10:  # Skip if pivot is zero
+            continue
+        m[i] = m[i] / m[i, i]  # Normalize pivot row
+        for r in range(i + 1, rows):
+            m[r] -= m[r, i] * m[i]  # Eliminate below pivot
+    return m
+
+# Function to calculate RREF (Row Reduced Echelon Form)
+def rref(matrix):
+    m = ref(matrix)
+    rows, cols = m.shape
+    for i in range(min(rows, cols) - 1, -1, -1):
+        if abs(m[i, i]) > 1e-10:
+            for r in range(i - 1, -1, -1):
+                m[r] -= m[r, i] * m[i]  # Eliminate above pivot
+    return m
+
+
+# Page 5: 3D Visualization of Dependent Vectors
+if page == "5":
+    st.title("3D Visualization of Dependent Vectors and Matrix Transformations")
+
+    # Input for the matrix
+    st.subheader("Enter a 3x3 matrix:")
+    matrix = np.array([
+        [st.number_input("Matrix[1,1]", value=1.0), st.number_input("Matrix[1,2]", value=1.0), st.number_input("Matrix[1,3]", value=0.0)],
+        [st.number_input("Matrix[2,1]", value=2.0), st.number_input("Matrix[2,2]", value=2.0), st.number_input("Matrix[2,3]", value=0.0)],
+        [st.number_input("Matrix[3,1]", value=3.0), st.number_input("Matrix[3,2]", value=3.0), st.number_input("Matrix[3,3]", value=0.0)]
+    ])
+
+    # Calculate REF and RREF
+    ref_matrix = ref(matrix)
+    rref_matrix = rref(matrix)
+
+    # Display matrices
+    st.subheader("Original Matrix:")
+    st.table(pd.DataFrame(matrix, columns=["x1", "x2", "x3"], index=["Row 1", "Row 2", "Row 3"]))
+
+    st.subheader("Row Echelon Form (REF):")
+    st.table(pd.DataFrame(ref_matrix, columns=["x1", "x2", "x3"], index=["Row 1", "Row 2", "Row 3"]))
+
+    st.subheader("Reduced Row Echelon Form (RREF):")
+    st.table(pd.DataFrame(rref_matrix, columns=["x1", "x2", "x3"], index=["Row 1", "Row 2", "Row 3"]))
+
+    # 3D Visualization of dependent vectors
+    st.subheader("3D Plot of Dependent Vectors:")
+    fig = plt.figure(figsize=(8, 8))
+    ax = fig.add_subplot(111, projection='3d')
+
+    # Origin
+    origin = np.array([0, 0, 0])
+
+    # Define vectors
+    vec1, vec2, vec3 = matrix[0], matrix[1], matrix[2]
+
+    # Plot vectors
+    ax.quiver(*origin, *vec1, color="red", label="Vector 1")
+    ax.quiver(*origin, *vec2, color="blue", label="Vector 2")
+    ax.quiver(*origin, *vec3, color="green", label="Vector 3")
+
+    # Set plot limits and labels
+    ax.set_xlim([-4, 4])
+    ax.set_ylim([-4, 4])
+    ax.set_zlim([-1, 1])
+    ax.set_xlabel("X-axis")
+    ax.set_ylabel("Y-axis")
+    ax.set_zlabel("Z-axis")
+
+    # Add grid and legend
+    ax.grid(True)
+    plt.legend()
+    plt.title("3D Plot of Dependent Vectors (Same Plane)")
+    st.pyplot(fig)
